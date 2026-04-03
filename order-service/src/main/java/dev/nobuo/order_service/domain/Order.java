@@ -1,16 +1,29 @@
 package dev.nobuo.order_service.domain;
 
 import dev.nobuo.order_service.domain.exception.DomainValidationException;
+import jakarta.persistence.*;
 
 import java.time.Instant;
 
 import static dev.nobuo.order_service.utils.GuardUtils.isNullOrEmpty;
 
+@Entity
+@Table(name = "orders")
 public class Order {
-    private final OrderId id;
-    private final Instant creationDate;
+    @Id
+    private OrderId id;
+
+    @Column(nullable = false, updatable = false)
+    private Instant creationDate;
+
+    @Column(nullable = false)
     private Instant updateDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private OrderStatus status;
+
+    @Column
     private String cancellationReason;
 
     private Order(OrderId id, Instant creationDate, Instant updateDate, OrderStatus status, String cancellationReason) {
@@ -19,6 +32,9 @@ public class Order {
         this.updateDate = updateDate;
         this.status = status;
         this.cancellationReason = cancellationReason;
+    }
+
+    protected Order() {
     }
 
     public static Order create(OrderId id, Instant creationDate) {

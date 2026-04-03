@@ -1,16 +1,24 @@
 package dev.nobuo.order_service.domain;
 
 import dev.nobuo.order_service.domain.exception.DomainValidationException;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 
 import java.util.UUID;
 
 import static dev.nobuo.order_service.utils.GuardUtils.isNullOrEmpty;
 
+@Embeddable
 public class OrderId {
-    private final String id;
+
+    @Column(name = "id", nullable = false, updatable = false)
+    private String id;
 
     private OrderId(String id) {
         this.id = id;
+    }
+
+    protected OrderId() {
     }
 
     public static OrderId of(String id) {
