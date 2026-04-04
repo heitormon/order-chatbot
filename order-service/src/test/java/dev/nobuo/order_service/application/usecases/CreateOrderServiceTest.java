@@ -5,6 +5,7 @@ import dev.nobuo.order_service.application.exception.InvalidInputException;
 import dev.nobuo.order_service.application.port.inbound.CreateOrderUseCase;
 import dev.nobuo.order_service.application.port.outbound.DateTimeProvider;
 import dev.nobuo.order_service.application.port.outbound.OrderRepository;
+import dev.nobuo.order_service.application.port.outbound.TransactionExecutor;
 import dev.nobuo.order_service.domain.Order;
 import dev.nobuo.order_service.domain.OrderId;
 import dev.nobuo.order_service.domain.OrderStatus;
@@ -15,7 +16,8 @@ import org.mockito.ArgumentCaptor;
 import java.time.Instant;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -23,6 +25,7 @@ class CreateOrderServiceTest {
     private CreateOrderUseCase.Input input;
     private OrderRepository orderRepository;
     private DateTimeProvider dateTimeProvider;
+    private TransactionExecutor transactionExecutor;
 
     private CreateOrderService createOrderService;
 
@@ -30,7 +33,15 @@ class CreateOrderServiceTest {
     void setUp() {
         orderRepository = mock(OrderRepository.class);
         dateTimeProvider = mock(DateTimeProvider.class);
-        createOrderService = new CreateOrderService(orderRepository, dateTimeProvider);
+        transactionExecutor = mock(TransactionExecutor.class);
+
+        doAnswer(invocation -> {
+            Runnable action = invocation.getArgument(0);
+            action.run();
+            return null;
+        }).when(transactionExecutor).execute(any(Runnable.class));
+
+        createOrderService = new CreateOrderService(orderRepository, dateTimeProvider, transactionExecutor);
 
         String id = "4d009b71-d6a8-4082-b5fc-a8672f8de9f1";
         Instant now = Instant.parse("2026-04-03T10:00:00Z");
@@ -47,6 +58,7 @@ class CreateOrderServiceTest {
 
         ArgumentCaptor<Order> orderCaptor = ArgumentCaptor.forClass(Order.class);
         verify(orderRepository).save(orderCaptor.capture());
+        verify(transactionExecutor).execute(any(Runnable.class));
 
         Order order = orderCaptor.getValue();
         assertEquals(OrderId.of(input.id()), order.getId());
@@ -64,6 +76,7 @@ class CreateOrderServiceTest {
 
         assertEquals("input must not be null", ex.getMessage());
         verifyNoInteractions(orderRepository, dateTimeProvider);
+        verify(transactionExecutor).execute(any(Runnable.class));
     }
 
     @Test
@@ -77,6 +90,7 @@ class CreateOrderServiceTest {
 
         assertEquals("id must not be null", ex.getMessage());
         verifyNoInteractions(orderRepository, dateTimeProvider);
+        verify(transactionExecutor).execute(any(Runnable.class));
     }
 
     @Test
@@ -90,6 +104,7 @@ class CreateOrderServiceTest {
 
         assertEquals("id must be a valid UUID", ex.getMessage());
         verifyNoInteractions(orderRepository, dateTimeProvider);
+        verify(transactionExecutor).execute(any(Runnable.class));
     }
 
     @Test
@@ -107,5 +122,6 @@ class CreateOrderServiceTest {
         assertEquals("order already exists", ex.getMessage());
         verify(orderRepository, never()).save(any());
         verifyNoInteractions(dateTimeProvider);
+        verify(transactionExecutor).execute(any(Runnable.class));
     }
 }

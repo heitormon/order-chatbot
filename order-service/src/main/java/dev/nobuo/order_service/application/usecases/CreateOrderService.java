@@ -5,6 +5,7 @@ import dev.nobuo.order_service.application.exception.InvalidInputException;
 import dev.nobuo.order_service.application.port.inbound.CreateOrderUseCase;
 import dev.nobuo.order_service.application.port.outbound.DateTimeProvider;
 import dev.nobuo.order_service.application.port.outbound.OrderRepository;
+import dev.nobuo.order_service.application.port.outbound.TransactionExecutor;
 import dev.nobuo.order_service.domain.Order;
 import dev.nobuo.order_service.domain.OrderId;
 import dev.nobuo.order_service.domain.exception.DomainValidationException;
@@ -15,16 +16,20 @@ import java.util.Optional;
 public class CreateOrderService implements CreateOrderUseCase {
     private final OrderRepository orderRepository;
     private final DateTimeProvider dateTimeProvider;
+    private final TransactionExecutor transactionExecutor;
 
-    public CreateOrderService(OrderRepository orderRepository, DateTimeProvider dateTimeProvider) {
+    public CreateOrderService(OrderRepository orderRepository,
+                              DateTimeProvider dateTimeProvider,
+                              TransactionExecutor transactionExecutor) {
         this.orderRepository = orderRepository;
         this.dateTimeProvider = dateTimeProvider;
+        this.transactionExecutor = transactionExecutor;
     }
 
     @Override
     public void execute(Input input) {
         try {
-            createOrder(input);
+            transactionExecutor.execute(() -> createOrder(input));
         } catch (DomainValidationException ex) {
             throw new InvalidInputException(ex.getMessage(), ex);
         }
