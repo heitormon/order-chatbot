@@ -24,7 +24,7 @@ class OrderIdTest {
     @Test
     void createValueOf_throwException_whenInputIsNull() {
         DomainValidationException domainValidationException = assertThrowsExactly(DomainValidationException.class, () -> OrderId.of(null));
-        assertEquals("id must not be null or empty", domainValidationException.getMessage());
+        assertEquals("id must not be null", domainValidationException.getMessage());
     }
 
     @Test

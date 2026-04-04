@@ -6,8 +6,6 @@ import jakarta.persistence.Embeddable;
 
 import java.util.UUID;
 
-import static dev.nobuo.order_service.utils.GuardUtils.isNullOrEmpty;
-
 @Embeddable
 public class OrderId {
 
@@ -22,8 +20,8 @@ public class OrderId {
     }
 
     public static OrderId of(String id) {
-        if (isNullOrEmpty(id)) {
-            throw new DomainValidationException("id must not be null or empty");
+        if (id == null) {
+            throw new DomainValidationException("id must not be null");
         }
         try {
             UUID.fromString(id);

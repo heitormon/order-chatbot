@@ -5,8 +5,6 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 
-import static dev.nobuo.order_service.utils.GuardUtils.isNullOrEmpty;
-
 @Entity
 @Table(name = "orders")
 public class Order {
@@ -55,7 +53,7 @@ public class Order {
     }
 
     public void cancel(Instant updateDate, String reason) {
-        if (isNullOrEmpty(reason)) {
+        if (reason == null || reason.isBlank()) {
             throw new DomainValidationException("cancellationReason must not be null or blank");
         }
         if (this.status != OrderStatus.CONFIRMED) {
