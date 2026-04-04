@@ -28,7 +28,7 @@ class OrderRepositoryImplTest {
     void savesOrder() {
         Instant now = Instant.now();
         OrderId orderId = OrderId.of("55fa4ba8-2b1e-4525-be6e-9389efa8416b");
-        Order order = Order.create(orderId,now);
+        Order order = Order.create(orderId, now);
         orderRepository.save(order);
 
         orderRepository.findById(orderId).ifPresent(System.out::println);

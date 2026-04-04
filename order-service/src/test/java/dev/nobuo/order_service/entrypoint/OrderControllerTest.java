@@ -55,19 +55,19 @@ class OrderControllerTest {
         mockMvc.perform(post("/orders")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                        {
-                          "id": "55fa4ba8-2b1e-4525-be6e-9389efa8416b"
-                        }
-                        """))
+                                {
+                                  "id": "55fa4ba8-2b1e-4525-be6e-9389efa8416b"
+                                }
+                                """))
                 .andExpect(status().isCreated());
 
         mockMvc.perform(post("/orders")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                        {
-                          "id": "55fa4ba8-2b1e-4525-be6e-9389efa8416b"
-                        }
-                        """))
+                                {
+                                  "id": "55fa4ba8-2b1e-4525-be6e-9389efa8416b"
+                                }
+                                """))
                 .andExpect(status().isConflict())
                 .andExpect(content().json("""
                         {
@@ -81,10 +81,10 @@ class OrderControllerTest {
         mockMvc.perform(post("/orders")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                        {
-                          "id": "invalid-id"
-                        }
-                        """))
+                                {
+                                  "id": "invalid-id"
+                                }
+                                """))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json("""
                         {

@@ -10,6 +10,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class OrderTest {
 
+    private static Order createOrder() {
+        OrderId orderId = OrderId.of("4d009b71-d6a8-4082-b5fc-a8672f8de9f1");
+        Instant creationDate = Instant.parse("2018-09-09T00:00:00Z");
+
+        return Order.create(orderId, creationDate);
+    }
+
     @Test
     void create_success() {
         OrderId orderId = OrderId.of("4d009b71-d6a8-4082-b5fc-a8672f8de9f1");
@@ -154,13 +161,6 @@ class OrderTest {
 
         DomainValidationException domainValidationException = assertThrowsExactly(DomainValidationException.class, () -> order.ship(Instant.parse("2018-09-09T12:00:00Z")));
         assertEquals("updateDate must be greater than or equal to current updateDate", domainValidationException.getMessage());
-    }
-
-    private static Order createOrder() {
-        OrderId orderId = OrderId.of("4d009b71-d6a8-4082-b5fc-a8672f8de9f1");
-        Instant creationDate = Instant.parse("2018-09-09T00:00:00Z");
-
-        return Order.create(orderId, creationDate);
     }
 
 }
