@@ -2,6 +2,7 @@ package dev.nobuo.order_service.entrypoint.handler;
 
 import dev.nobuo.order_service.application.exception.ConflictException;
 import dev.nobuo.order_service.application.exception.InvalidInputException;
+import dev.nobuo.order_service.application.exception.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -19,6 +20,12 @@ public class ApiExceptionHandler {
     @ExceptionHandler(ConflictException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleConflict(ConflictException ex) {
+        return new ErrorResponse(ex.getMessage());
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNotFound(NotFoundException ex) {
         return new ErrorResponse(ex.getMessage());
     }
 

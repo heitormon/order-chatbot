@@ -13,6 +13,9 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.UUID;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -40,14 +43,25 @@ class OrderControllerTest {
 
     @Test
     void createOrder() throws Exception {
+        String orderId = UUID.randomUUID().toString();
         mockMvc.perform(post("/orders")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "id": "55fa4ba8-2b1e-4525-be6e-9389efa8416b"
+                                  "id": "%s"
                                 }
-                                """))
+                                """.formatted(orderId)))
                 .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/orders/" + orderId)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json("""
+                        {
+                            "id": "%s",
+                            "status": "CREATED"
+                        }
+                        """.formatted(orderId)));
     }
 
     @Test
@@ -91,5 +105,19 @@ class OrderControllerTest {
                           "message": "id must be a valid UUID"
                         }
                         """));
+    }
+
+    @Test
+    void returnNotFound() throws Exception {
+        String orderId = UUID.randomUUID().toString();
+
+        mockMvc.perform(get("/orders/" + orderId)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(content().json("""
+                        {
+                          "message": "Order with id %s not found"
+                        }
+                        """.formatted(orderId)));
     }
 }
