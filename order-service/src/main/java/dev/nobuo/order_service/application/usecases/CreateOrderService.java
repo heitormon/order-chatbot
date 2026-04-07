@@ -11,7 +11,6 @@ import dev.nobuo.order_service.domain.OrderId;
 import dev.nobuo.order_service.domain.exception.DomainValidationException;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -38,7 +37,7 @@ public class CreateOrderService implements CreateOrderUseCase {
     }
 
     private void createOrder(Input input) {
-        if (Objects.isNull(input)) {
+        if (input == null) {
             throw new InvalidInputException("input must not be null");
         }
 
