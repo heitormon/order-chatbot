@@ -7,25 +7,24 @@ Este documento resume o fluxo principal do `order-service`, incluindo os endpoin
 ```mermaid
 flowchart LR
     client["Client / API consumer"]
+    postgres[("PostgreSQL")]
+    ollama["Ollama / Local LLM"]
 
     subgraph entrypoint["Entrypoint"]
+        direction TB
         orderController["OrderController"]
         exceptionHandler["ApiExceptionHandler"]
     end
 
     subgraph application["Application"]
+        direction TB
         createUseCase["CreateOrderUseCase"]
         getUseCase["GetOrderUseCase"]
         askUseCase["AskOrderAssistantUseCase"]
     end
 
-    subgraph domain["Domain"]
-        order["Order"]
-        orderId["OrderId"]
-        orderStatus["OrderStatus"]
-    end
-
     subgraph outboundPorts["Outbound Ports"]
+        direction TB
         orderRepositoryPort["OrderRepository"]
         transactionPort["TransactionExecutor"]
         dateTimePort["DateTimeProvider"]
@@ -33,6 +32,7 @@ flowchart LR
     end
 
     subgraph infrastructure["Infrastructure"]
+        direction TB
         orderRepositoryImpl["OrderRepositoryImpl"]
         jpaOrderRepository["JpaOrderRepository"]
         transactionExecutor["TransactionExecutorImpl"]
@@ -43,8 +43,12 @@ flowchart LR
         aiConfig["AiConfig"]
     end
 
-    postgres[("PostgreSQL")]
-    ollama["Ollama / Local LLM"]
+    subgraph domain["Domain"]
+        direction TB
+        orderId["OrderId"]
+        order["Order"]
+        orderStatus["OrderStatus"]
+    end
 
     client --> orderController
     orderController --> createUseCase
@@ -52,23 +56,11 @@ flowchart LR
     orderController --> askUseCase
     orderController --> exceptionHandler
 
+    createUseCase --> orderRepositoryPort
+    getUseCase --> orderRepositoryPort
+    askUseCase --> aiPort
     createUseCase --> transactionPort
     createUseCase --> dateTimePort
-    createUseCase --> orderRepositoryPort
-    createUseCase --> order
-    createUseCase --> orderId
-
-    getUseCase --> orderRepositoryPort
-    getUseCase --> orderId
-    getUseCase --> order
-    getUseCase --> orderStatus
-
-    askUseCase --> aiPort
-    aiPort --> aiAssistantImpl
-    aiAssistantImpl --> aiClient
-    aiClient --> ollama
-    aiClient --> aiTools
-    aiTools --> getUseCase
 
     orderRepositoryPort --> orderRepositoryImpl
     orderRepositoryImpl --> jpaOrderRepository
@@ -76,7 +68,19 @@ flowchart LR
 
     transactionPort --> transactionExecutor
     dateTimePort --> dateTimeProvider
+
+    aiPort --> aiAssistantImpl
+    aiAssistantImpl --> aiClient
     aiConfig --> aiClient
+    aiClient --> ollama
+    aiClient --> aiTools
+    aiTools --> getUseCase
+
+    createUseCase -. uses .-> orderId
+    createUseCase -. creates .-> order
+    getUseCase -. reads .-> order
+    getUseCase -. maps .-> orderStatus
+    getUseCase -. validates .-> orderId
 ```
 
 ## Fluxo de Criacao de Pedido
